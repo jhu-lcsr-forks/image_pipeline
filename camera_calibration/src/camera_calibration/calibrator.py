@@ -48,6 +48,9 @@ import sensor_msgs.msg
 import tarfile
 import time
 
+import rospy
+import std_msgs.msg as std_msgs
+
 
 
 # Supported calibration patterns
@@ -252,6 +255,10 @@ class Calibrator(object):
         self.goodenough = False
         self.param_ranges = [0.7, 0.7, 0.4, 0.5]
         self.name = name
+
+        # Add a publisher to report when samples have been added
+        self.added_sample_publisher = rospy.Publisher('~added_sample', std_msgs.Int16)
+
 
     def mkgray(self, msg):
         """
@@ -789,6 +796,10 @@ class MonoCalibrator(Calibrator):
                     self.db.append((params, gray))
                     self.good_corners.append((corners, board))
                     print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f" % tuple([len(self.db)] + params)))
+
+                    # Publish the parameters to notify that a sample has been added to the solver db
+                    index_msg = std_msgs.Int16(len(self.db)) 
+                    self.added_sample_publisher.publish(index_msg)
 
         rv = MonoDrawable()
         rv.scrib = scrib
