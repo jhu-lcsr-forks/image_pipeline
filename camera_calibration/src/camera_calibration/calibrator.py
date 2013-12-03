@@ -49,7 +49,8 @@ import tarfile
 import time
 
 import rospy
-import std_msgs.msg as std_msgs
+import camera_calibration_msgs.msg
+import geometry_msgs.msg
 
 
 
@@ -257,7 +258,9 @@ class Calibrator(object):
         self.name = name
 
         # Add a publisher to report when samples have been added
-        self.added_sample_publisher = rospy.Publisher('~added_sample', std_msgs.Int16)
+        self.added_sample_publisher = rospy.Publisher(
+                '%s/calibration_samples' % rospy.remap_name("camera"),
+                camera_calibration_msgs.msg.CalibrationSample)
 
 
     def mkgray(self, msg):
@@ -798,8 +801,23 @@ class MonoCalibrator(Calibrator):
                     print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f" % tuple([len(self.db)] + params)))
 
                     # Publish the parameters to notify that a sample has been added to the solver db
-                    index_msg = std_msgs.Int16(len(self.db)) 
-                    self.added_sample_publisher.publish(index_msg)
+                    sample_msg = camera_calibration_msgs.msg.CalibrationSample()
+
+                    sample_msg.sample_id = (len(self.db)) 
+
+                    sample_msg.board_n_rows = board.n_rows
+                    sample_msg.board_n_cols = board.n_cols
+                    sample_msg.board_dim = board.dim
+
+                    sample_msg.x = params[0]
+                    sample_msg.y = params[1]
+                    sample_msg.size = params[2]
+                    sample_msg.skew = params[3]
+                    
+                    sample_msg.corners = [geometry_msgs.msg.Point(c[0],c[1],1) for c in corners]
+                    sample_msg.raw_image = self.br.cv_to_imgmsg(gray, encoding="passthrough")
+
+                    self.added_sample_publisher.publish(sample_msg)
 
         rv = MonoDrawable()
         rv.scrib = scrib
