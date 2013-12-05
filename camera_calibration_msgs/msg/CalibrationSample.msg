@@ -2,8 +2,7 @@
 # calibration data for a given camera during calibration. It should get
 # published in the namespace of the raw image topic to which it corresponds.
 
-# The number of the sample
-uint32 sample_id
+std_msgs/Header header
 
 # Board properties
 uint32 board_n_rows

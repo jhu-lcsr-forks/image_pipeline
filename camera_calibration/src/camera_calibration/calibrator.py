@@ -791,7 +791,9 @@ class MonoCalibrator(Calibrator):
                     # Publish the parameters to notify that a sample has been added to the solver db
                     sample_msg = camera_calibration_msgs.msg.CalibrationSample()
 
-                    sample_msg.sample_id = (len(self.db)) 
+                    sample_msg.header.seq = (len(self.db)) 
+                    sample_msg.header.stamp = rospy.Time.now()
+                    sample_msg.header.frame_id = "camera_optical_frame"
 
                     sample_msg.board_n_rows = board.n_rows
                     sample_msg.board_n_cols = board.n_cols
