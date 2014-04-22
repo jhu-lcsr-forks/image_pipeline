@@ -187,6 +187,8 @@ class OpenCVCalibrationNode(CalibrationNode):
         #self.button = cv.LoadImage("%s/button.jpg" % roslib.packages.get_pkg_dir(PKG))
         cv.SetMouseCallback("display", self.on_mouse)
         cv.CreateTrackbar("scale", "display", 0, 100, self.on_scale)
+        cv.CreateTrackbar("min_samples", "display", 1, 40, self.on_min_samples)
+        cv.SetTrackbarPos("min_samples", "display", 40)
 
     def on_mouse(self, event, x, y, flags, param):
         if event == cv.CV_EVENT_LBUTTONDOWN and self.displaywidth < x:
@@ -212,6 +214,9 @@ class OpenCVCalibrationNode(CalibrationNode):
     def on_scale(self, scalevalue):
         if self.c.calibrated:
             self.c.set_alpha(scalevalue / 100.0)
+
+    def on_min_samples(self, min_sample_value):
+        self.c.min_sample_value = min_sample_value
 
     def button(self, dst, label, enable):
         cv.Set(dst, (255, 255, 255))

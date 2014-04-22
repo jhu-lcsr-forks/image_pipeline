@@ -234,6 +234,7 @@ class Calibrator:
             self._boards = boards
 
         # Set to true after we perform calibration
+        self.min_samples = 40
         self.calibrated = False
         self.calib_flags = flags
         self.pattern = pattern
@@ -321,7 +322,7 @@ class Calibrator:
         progress = [min((hi - lo) / r, 1.0) for (lo, hi, r) in zip(min_params, max_params, self.param_ranges)]
         # If we have lots of samples, allow calibration even if not all parameters are green
         # TODO Awkward that we update self.goodenough instead of returning it
-        self.goodenough = (len(self.db) >= 40) or all([p == 1.0 for p in progress])
+        self.goodenough = (len(self.db) >= self.min_samples) or all([p == 1.0 for p in progress])
 
         return zip(self._param_names, min_params, max_params, progress)
 
